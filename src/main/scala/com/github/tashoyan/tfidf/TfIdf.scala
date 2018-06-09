@@ -9,14 +9,14 @@ import org.apache.spark.sql.functions._
   *
   * @param config Configuration object that allows to customize data set column names.
   */
-class TfIdf(config: TfIdfSparkConfig) {
+class TfIdf(config: TfIdfConfig) {
 
   /**
     * Calculates TF, DF, IDF and TF * IDF metrics for all tokens from the input document set.
     *
     * @param documents Data set with documents.
-    *                  The column containing documents is defined by [[TfIdfSparkConfig.documentColumn]] parameter.
-    * @return Data set with the following columns (column names are configurable via [[TfIdfSparkConfig]] config object):
+    *                  The column containing documents is defined by [[TfIdfConfig.documentColumn]] parameter.
+    * @return Data set with the following columns (column names are configurable via [[TfIdfConfig]] config object):
     *         <ul>
     *         <li> `document` - input documents
     *         <li> `doc_id` - unique identifier for the each input document
@@ -69,7 +69,7 @@ class TfIdf(config: TfIdfSparkConfig) {
 
 }
 
-case class TfIdfSparkConfig(
+case class TfIdfConfig(
     documentColumn: String = "document",
     docIdColumn: String = "doc_id",
     tokenColumn: String = "token",

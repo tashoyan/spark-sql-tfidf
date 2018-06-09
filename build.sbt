@@ -31,7 +31,8 @@ val sparkVersion = "2.2.1"
 libraryDependencies ++= Seq(
 //  "org.apache.spark" %% "spark-core" % sparkVersion,
   "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
-  "org.scalatest" %% "scalatest" % "3.0.4" % "test"
+  "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided",
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 )
 
 fork := true
