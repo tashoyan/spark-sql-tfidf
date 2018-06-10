@@ -17,8 +17,8 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
 
   before {
     spark = SparkSession.builder()
-        .master("local[*]")
-        .getOrCreate()
+      .master("local[*]")
+      .getOrCreate()
   }
 
   after {
@@ -38,13 +38,14 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
     val tfIdf = new TfIdf(config)
     val result = tfIdf.genTfIdf(sampleDf)
       .cache()
-    result
-      .orderBy(
-        col(config.docIdColumn),
-        col(config.tokenColumn),
-        col(config.tfIdfColumn).desc
-      )
-      .show(false)
+    /*Look at the results*/
+    //    result
+    //      .orderBy(
+    //        col(config.docIdColumn),
+    //        col(config.tokenColumn),
+    //        col(config.tfIdfColumn).desc
+    //      )
+    //      .show(false)
 
     val columns = result.columns
     config.productIterator.foreach { mandatoryColumn: Any =>
