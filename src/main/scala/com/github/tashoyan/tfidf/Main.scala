@@ -2,7 +2,7 @@ package com.github.tashoyan.tfidf
 
 import java.io.File
 
-import org.apache.spark.ml.feature.RegexTokenizer
+import org.apache.spark.ml.feature.{RegexTokenizer, StopWordsRemover}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -77,12 +77,23 @@ object Main {
     val noPunctText = noAbbrText.withColumn(noPunctColumn,
       regexp_replace(col(noAbbrColumn), """[\p{Punct}]""", ""))
 
+    val rawWordsColumn = "raw_words"
     val tokenizer: RegexTokenizer = new RegexTokenizer()
       .setInputCol(noPunctColumn)
-      .setOutputCol(wordsColumn)
+      .setOutputCol(rawWordsColumn)
       .setToLowercase(true)
-    val words = tokenizer.transform(noPunctText)
+    val rawWords = tokenizer.transform(noPunctText)
+        .where(size(col(rawWordsColumn)) > 0)
 
-    words.where(size(col(wordsColumn)) > 0)
+    val stopWordsRemover = new StopWordsRemover()
+      .setInputCol(rawWordsColumn)
+      .setOutputCol(wordsColumn)
+      .setStopWords(getStopWords)
+    stopWordsRemover.transform(rawWords)
   }
+
+  private def getStopWords: Array[String] =
+    StopWordsRemover.loadDefaultStopWords("english") ++
+      Seq("till", "since")
+
 }
