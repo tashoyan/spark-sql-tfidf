@@ -30,12 +30,6 @@ object Main {
 
     val documents = readDocuments(docsDirPath)
 
-    //    val documents = readDocuments(
-    //      "battle_hymn_of_the_republic.txt",
-    //      "seek_and_destroy.txt",
-    //      "love_me_tender.txt"
-    //    )
-
     val words = prepareWords(documents)
     words
       .select(wordsColumn)
@@ -51,7 +45,7 @@ object Main {
     terms
       .withColumn(rowNumColumn, row_number() over window)
       .where(col(rowNumColumn) <= 20)
-      .select(docNameColumn, config.tokenColumn, config.tfIdfColumn)
+      .select(docNameColumn, docPathColumn, config.tokenColumn, config.tfIdfColumn)
       .show(100, truncate = false)
   }
 
