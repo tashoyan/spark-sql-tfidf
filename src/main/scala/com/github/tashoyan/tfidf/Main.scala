@@ -22,7 +22,8 @@ object Main {
   def main(args: Array[String]): Unit = {
     val documents = readDocuments(
       "battle_hymn_of_the_republic.txt",
-      "seek_and_destroy.txt"
+      "seek_and_destroy.txt",
+      "love_me_tender.txt"
     )
 
     val words = prepareWords(documents)
