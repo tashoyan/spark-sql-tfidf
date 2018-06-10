@@ -36,8 +36,7 @@ class TfIdf(config: TfIdfConfig) {
     val tokensWithDfIdf = addIdf(tokensWithDf, documents.count())
     val tfIdf = joinTfIdf(tokensWithTf, tokensWithDfIdf)
 
-    unfoldedDocs
-      .join(tfIdf, Seq(config.docIdColumn, config.tokenColumn), "left")
+    tfIdf.join(docsWithId, Seq(config.docIdColumn), "left")
   }
 
   protected def addDocId(documents: DataFrame): DataFrame =
