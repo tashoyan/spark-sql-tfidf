@@ -11,8 +11,11 @@ object Main {
   private val spark = SparkSession.builder()
     .appName("TfIdf")
     .getOrCreate()
+  spark.sparkContext.setLogLevel("WARN")
+
   import spark.implicits._
 
+  private val docNameColumn = "doc_name"
   private val rawTextColumn = "raw_text"
   private val wordsColumn = "words"
 
@@ -21,7 +24,6 @@ object Main {
       "battle_hymn_of_the_republic.txt",
       "seek_and_destroy.txt"
     )
-    documents.show()
 
     val words = prepareWords(documents)
     words
@@ -33,26 +35,26 @@ object Main {
     val terms = tfIdf.genTfIdf(words)
 
     val window = Window.partitionBy(config.docIdColumn)
-        .orderBy(col(config.tfIdfColumn).desc)
-    val rankColumn = "rank"
+      .orderBy(col(config.tfIdfColumn).desc)
+    val rowNumColumn = "row_number"
     terms
-      .withColumn(rankColumn, row_number() over window)
-      .where(col(rankColumn) <= 10)
-      .select(config.docIdColumn, config.tokenColumn, config.tfIdfColumn)
-      .distinct()
-      .show(500,false)
+      .withColumn(rowNumColumn, row_number() over window)
+      .where(col(rowNumColumn) <= 20)
+      .select(docNameColumn, config.tokenColumn, config.tfIdfColumn)
+      .show(100, truncate = false)
   }
 
   private def readDocuments(names: String*): DataFrame = {
-    val docs: Seq[String] = names.map(readDocument)
-    docs.toDF(rawTextColumn)
+    val docs: Seq[(String, String)] = names.map(readDocument)
+    docs.toDF(docNameColumn, rawTextColumn)
   }
 
-  private def readDocument(name: String): String = {
+  private def readDocument(name: String): (String, String) = {
     val resourceStream = this.getClass
       .getResourceAsStream(name)
-    Source.fromInputStream(resourceStream)
+    val content = Source.fromInputStream(resourceStream)
       .mkString
+    (name, content)
   }
 
   private def prepareWords(rawText: DataFrame): DataFrame = {
