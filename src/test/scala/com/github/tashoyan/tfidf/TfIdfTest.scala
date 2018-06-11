@@ -18,6 +18,8 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
   before {
     spark = SparkSession.builder()
       .master("local[*]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.sql.warehouse.dir", "target/spark-warehouse")
       .getOrCreate()
   }
 
