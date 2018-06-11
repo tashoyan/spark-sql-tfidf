@@ -15,7 +15,6 @@ class DocumentIndexer(
   private val spark = SparkSession.builder()
     .appName("TfIdf")
     .getOrCreate()
-  spark.sparkContext.setLogLevel("WARN")
 
   import spark.implicits._
 
