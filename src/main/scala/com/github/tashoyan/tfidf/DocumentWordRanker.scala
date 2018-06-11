@@ -60,12 +60,12 @@ class DocumentWordRanker(
 
   protected def prepareWords(rawText: DataFrame, wordsColumn: String): DataFrame = {
     val noAbbrColumn = "no_abbr"
-    val noAbbrText = rawText.withColumn(noAbbrColumn,
-      regexp_replace(col(config.rawTextColumn), """\w+'ll""", ""))
+    val noAbbrText = removeAbbreviations(rawText, noAbbrColumn)
 
     val noPunctColumn = "no_punct"
-    val noPunctText = noAbbrText.withColumn(noPunctColumn,
-      regexp_replace(col(noAbbrColumn), """[\p{Punct}]""", ""))
+    val noPunctText = noAbbrText
+      .withColumn(noPunctColumn,
+        regexp_replace(col(noAbbrColumn), """[\p{Punct}]""", ""))
 
     val rawWordsColumn = "raw_words"
     val tokenizer: RegexTokenizer = new RegexTokenizer()
@@ -81,6 +81,25 @@ class DocumentWordRanker(
       .setStopWords(getStopWords)
     stopWordsRemover.transform(rawWords)
   }
+
+  protected def removeAbbreviations(rawText: DataFrame, noAbbrColumn: String): DataFrame = {
+    val zeroDf = rawText.withColumn(noAbbrColumn, col(config.rawTextColumn))
+    getAbbreviations
+      .foldLeft(zeroDf) { (df, abbr) =>
+        df.withColumn(noAbbrColumn, regexp_replace(col(noAbbrColumn), abbr, ""))
+      }
+  }
+
+  protected def getAbbreviations: Seq[String] =
+  //TODO Add more if needed
+    Seq(
+      """(?i)\w+'ll""",
+      """(?i)\w+'re""",
+      """(?i)\w+'ve""",
+      """(?i)\w+'s""",
+      """(?i)i'm""",
+      """(?i)\w+'t"""
+    )
 
   protected def getStopWords: Array[String] =
     StopWordsRemover.loadDefaultStopWords("english") ++
