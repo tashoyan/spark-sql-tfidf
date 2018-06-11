@@ -22,7 +22,7 @@ class DocumentSearcher(
     * Searches for documents by keywords.
     *
     * @param keyWords Keywords to search.
-    * @return Documents with best matches.
+    * @return Documents matching keywords in the order of relevance.
     */
   def searchDocuments(keyWords: Set[String]): Set[Document] = {
     val docRankColumn = "doc_rank"
