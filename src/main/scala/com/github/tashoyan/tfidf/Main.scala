@@ -10,7 +10,7 @@ object Main {
     }
     val docsDirPath = args.head
 
-    Console.out.println(s"Ranking words in documents read from $docsDirPath")
+    Console.out.println(s"Ranking words in the documents located in $docsDirPath")
     val ranker = new DocumentWordRanker(docsDirPath)
     val rankedWordDocuments = ranker.rankWords
       .cache()
