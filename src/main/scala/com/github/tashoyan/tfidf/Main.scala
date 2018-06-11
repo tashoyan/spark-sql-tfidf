@@ -10,7 +10,7 @@ object Main {
     }
     val docsDirPath = args.head
 
-    Console.out.println(s"Indexing documents in $docsDirPath")
+    Console.out.println(s"Ranking words in documents read from $docsDirPath")
     val ranker = new DocumentWordRanker(docsDirPath)
     val rankedWordDocuments = ranker.rankWords
       .cache()
@@ -30,7 +30,7 @@ object Main {
   }
 
   private def extractKeyWords(userInput: String): Set[String] =
-    userInput
+    Option(userInput).getOrElse("")
       .split("""\s+""")
       .map(_.trim)
       .filter(_.nonEmpty)
