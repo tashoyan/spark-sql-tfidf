@@ -20,19 +20,25 @@ object Main {
     val searcher = new DocumentSearcher(documentIndex)
     while (true) {
       Console.out.println("Enter keywords separated by spaces (CTRL-C for exit):")
-      val keyWords = StdIn.readLine()
-        .split("""\s+""")
-        .map(_.trim)
-        .filter(_.nonEmpty)
-        .toSet
+      val userInput = StdIn.readLine()
+      val keyWords = extractKeyWords(userInput)
       if (keyWords.nonEmpty) {
         val documents = searcher.searchDocuments(keyWords)
-        val docStr = documents.zipWithIndex
-          .map { case (doc, index) => s" $index. ${doc.name}\t${doc.filePath}" }
-          .mkString("\n")
-        Console.out.println("Found:\n" + docStr)
+        Console.out.println("Found:\n" + toPrettyString(documents))
       }
     }
   }
+
+  private def extractKeyWords(userInput: String): Set[String] =
+    userInput
+      .split("""\s+""")
+      .map(_.trim)
+      .filter(_.nonEmpty)
+      .toSet
+
+  private def toPrettyString(documents: Set[Document]): String =
+    documents.zipWithIndex
+      .map { case (doc, index) => s" $index. ${doc.name}\t${doc.filePath}" }
+      .mkString("\n")
 
 }
