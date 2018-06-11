@@ -1,6 +1,7 @@
 # Using Apache Spark SQL API to calculate TF-IDF
 
-This project demonstrates how to calculate term frequency - inverse document frequency (TF-IDF)
+This project demonstrates how to calculate term frequency - inverse document frequency
+([TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf))
 with help of Spark SQL API.
 
 Additionally, this project implements a trivial search engine based on TF-IDF ranking.
