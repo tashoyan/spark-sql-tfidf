@@ -10,10 +10,12 @@ object Main {
     }
     val docsDirPath = args.head
 
+    Console.out.println(s"Indexing documents in $docsDirPath")
     val indexer = new DocumentIndexer(docsDirPath)
     val documentIndex = indexer.buildIndex
-        .cache()
-    documentIndex.show(1000, truncate = false)
+      .cache()
+    /*Look at the document index*/
+    //    documentIndex.show(1000, truncate = false)
 
     val searcher = new DocumentSearcher(documentIndex)
     while (true) {

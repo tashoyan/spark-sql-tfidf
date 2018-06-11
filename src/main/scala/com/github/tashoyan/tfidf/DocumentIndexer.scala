@@ -3,7 +3,6 @@ package com.github.tashoyan.tfidf
 import java.io.File
 
 import org.apache.spark.ml.feature.{RegexTokenizer, StopWordsRemover}
-import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -11,7 +10,6 @@ import scala.io.Source
 
 class DocumentIndexer(
                        docsDirPath: String,
-                       maxTfIdfRank: Int = 10,
                        config: DocumentIndexerConfig = DocumentIndexerConfig()
                      ) {
   private val spark = SparkSession.builder()
@@ -26,26 +24,6 @@ class DocumentIndexer(
     val wordsColumn = "words"
     val words = prepareWords(documents, wordsColumn)
     indexImportantWords(words, wordsColumn)
-  }
-
-  protected def indexImportantWords(words: DataFrame, wordsColumn: String): DataFrame = {
-    val tfIdfConfig = TfIdfConfig(documentColumn = wordsColumn)
-    val tfIdf = new TfIdf(tfIdfConfig)
-    val tfIdfWords = tfIdf.genTfIdf(words)
-
-    val tfIdfRankColumn = "tf_idf_rank"
-    val window = Window.partitionBy(tfIdfConfig.docIdColumn)
-      .orderBy(col(tfIdfConfig.tfIdfColumn).desc)
-    tfIdfWords
-      .select(
-        tfIdfConfig.docIdColumn,
-        config.docNameColumn,
-        config.docPathColumn,
-        tfIdfConfig.tokenColumn,
-        tfIdfConfig.tfIdfColumn
-      )
-      .withColumn(tfIdfRankColumn, dense_rank() over window)
-      .where(col(tfIdfRankColumn) <= maxTfIdfRank)
   }
 
   protected def readDocuments(docsDirPath: String): DataFrame = {
@@ -94,6 +72,22 @@ class DocumentIndexer(
   protected def getStopWords: Array[String] =
     StopWordsRemover.loadDefaultStopWords("english") ++
       Seq("till", "since")
+
+  protected def indexImportantWords(words: DataFrame, wordsColumn: String): DataFrame = {
+    val tfIdfConfig = TfIdfConfig(documentColumn = wordsColumn)
+    val tfIdf = new TfIdf(tfIdfConfig)
+    val tfIdfWords = tfIdf.genTfIdf(words)
+
+    tfIdfWords
+      .select(
+        tfIdfConfig.docIdColumn,
+        config.docNameColumn,
+        config.docPathColumn,
+        tfIdfConfig.tokenColumn,
+        tfIdfConfig.tfIdfColumn
+      )
+      .orderBy(col(tfIdfConfig.docIdColumn), col(tfIdfConfig.tfIdfColumn).desc)
+  }
 
 }
 

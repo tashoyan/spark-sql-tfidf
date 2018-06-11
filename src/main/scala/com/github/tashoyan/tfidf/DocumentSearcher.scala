@@ -5,15 +5,19 @@ import org.apache.spark.sql.functions._
 
 class DocumentSearcher(
                         documentIndex: DataFrame,
-                        maxTfIdfRank: Int = 5,
+                        maxDocsReturn: Int = 5,
                         config: DocumentSearcherConfig = DocumentSearcherConfig()
                       ) {
 
   def searchDocuments(keyWords: Set[String]): Set[Document] = {
-    val foundDocs = documentIndex
-      .where(col(config.tokenColumn) isin (keyWords.toSeq: _*))
+    val docRankColumn = "doc_rank"
+    val rankedDocuments = getRankedDocuments(keyWords, docRankColumn)
+    /*Look at ranked documents for these keywords*/
+    //    rankedDocuments.show(false)
+    val foundDocs = rankedDocuments.orderBy(col(docRankColumn).desc)
+      .limit(maxDocsReturn)
       .select(config.docNameColumn, config.docPathColumn)
-      .distinct()
+
     foundDocs.collect()
       .map { row =>
         Document(
@@ -22,6 +26,15 @@ class DocumentSearcher(
         )
       }
       .toSet
+  }
+
+  protected def getRankedDocuments(keyWords: Set[String], docRankColumn: String): DataFrame = {
+    val matchingDocs = documentIndex
+      .where(col(config.tokenColumn) isin (keyWords.toSeq: _*))
+    matchingDocs
+      .groupBy(config.docIdColumn, config.docNameColumn, config.docPathColumn)
+      .agg(sum(config.tfIdfColumn) as docRankColumn)
+      .orderBy(col(docRankColumn).desc)
   }
 
 }
