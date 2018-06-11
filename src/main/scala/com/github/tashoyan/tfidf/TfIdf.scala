@@ -9,7 +9,7 @@ import org.apache.spark.sql.functions._
   *
   * @param config Configuration object that allows to customize data set column names.
   */
-class TfIdf(config: TfIdfConfig) {
+class TfIdf(config: TfIdfConfig = TfIdfConfig()) {
 
   /**
     * Calculates TF, DF, IDF and TF * IDF metrics for all tokens from the input document set.

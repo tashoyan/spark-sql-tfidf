@@ -1,26 +1,8 @@
 package com.github.tashoyan.tfidf
 
-import java.io.File
-
-import org.apache.spark.ml.feature.{RegexTokenizer, StopWordsRemover}
-import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, SparkSession}
-
-import scala.io.Source
+import scala.io.StdIn
 
 object Main {
-  private val spark = SparkSession.builder()
-    .appName("TfIdf")
-    .getOrCreate()
-  spark.sparkContext.setLogLevel("WARN")
-
-  import spark.implicits._
-
-  private val docNameColumn = "doc_name"
-  private val docPathColumn = "doc_path"
-  private val rawTextColumn = "raw_text"
-  private val wordsColumn = "words"
 
   def main(args: Array[String]): Unit = {
     if (args.length < 1) {
@@ -28,72 +10,27 @@ object Main {
     }
     val docsDirPath = args.head
 
-    val documents = readDocuments(docsDirPath)
+    val indexer = new DocumentIndexer(docsDirPath)
+    val documentIndex = indexer.buildIndex
+        .cache()
+    documentIndex.show(1000, truncate = false)
 
-    val words = prepareWords(documents)
-    words
-      .select(wordsColumn)
-      .show(false)
-
-    val config = TfIdfConfig(documentColumn = wordsColumn)
-    val tfIdf = new TfIdf(config)
-    val terms = tfIdf.genTfIdf(words)
-
-    val window = Window.partitionBy(config.docIdColumn)
-      .orderBy(col(config.tfIdfColumn).desc)
-    val rowNumColumn = "row_number"
-    terms
-      .withColumn(rowNumColumn, row_number() over window)
-      .where(col(rowNumColumn) <= 20)
-      .select(docNameColumn, docPathColumn, config.tokenColumn, config.tfIdfColumn)
-      .show(100, truncate = false)
-  }
-
-  private def readDocuments(docsDirPath: String): DataFrame = {
-    val docsDir = new File(docsDirPath)
-    if (!docsDir.isDirectory) {
-      throw new IllegalArgumentException(s"Not a directory: $docsDirPath")
+    val searcher = new DocumentSearcher(documentIndex)
+    while (true) {
+      Console.out.println("Enter keywords separated by spaces (CTRL-C for exit):")
+      val keyWords = StdIn.readLine()
+        .split("""\s+""")
+        .map(_.trim)
+        .filter(_.nonEmpty)
+        .toSet
+      if (keyWords.nonEmpty) {
+        val documents = searcher.searchDocuments(keyWords)
+        val docStr = documents.zipWithIndex
+          .map { case (doc, index) => s" $index. ${doc.name}\t${doc.filePath}" }
+          .mkString("\n")
+        Console.out.println("Found:\n" + docStr)
+      }
     }
-
-    val docFiles = docsDir.listFiles()
-      .filter(_.isFile)
-    if (docFiles.isEmpty) {
-      throw new IllegalArgumentException(s"None files found in the directory: $docsDirPath")
-    }
-
-    docFiles.map { docFile =>
-      (docFile.getName, docFile.getAbsolutePath, Source.fromFile(docFile).mkString)
-    }
-      .toSeq
-      .toDF(docNameColumn, docPathColumn, rawTextColumn)
   }
-
-  private def prepareWords(rawText: DataFrame): DataFrame = {
-    val noAbbrColumn = "no_abbr"
-    val noAbbrText = rawText.withColumn(noAbbrColumn,
-      regexp_replace(col(rawTextColumn), """\w+'ll""", ""))
-
-    val noPunctColumn = "no_punct"
-    val noPunctText = noAbbrText.withColumn(noPunctColumn,
-      regexp_replace(col(noAbbrColumn), """[\p{Punct}]""", ""))
-
-    val rawWordsColumn = "raw_words"
-    val tokenizer: RegexTokenizer = new RegexTokenizer()
-      .setInputCol(noPunctColumn)
-      .setOutputCol(rawWordsColumn)
-      .setToLowercase(true)
-    val rawWords = tokenizer.transform(noPunctText)
-        .where(size(col(rawWordsColumn)) > 0)
-
-    val stopWordsRemover = new StopWordsRemover()
-      .setInputCol(rawWordsColumn)
-      .setOutputCol(wordsColumn)
-      .setStopWords(getStopWords)
-    stopWordsRemover.transform(rawWords)
-  }
-
-  private def getStopWords: Array[String] =
-    StopWordsRemover.loadDefaultStopWords("english") ++
-      Seq("till", "since")
 
 }
