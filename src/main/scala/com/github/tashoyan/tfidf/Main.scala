@@ -11,13 +11,13 @@ object Main {
     val docsDirPath = args.head
 
     Console.out.println(s"Indexing documents in $docsDirPath")
-    val indexer = new DocumentIndexer(docsDirPath)
-    val documentIndex = indexer.buildIndex
+    val ranker = new DocumentWordRanker(docsDirPath)
+    val rankedWordDocuments = ranker.rankWords
       .cache()
-    /*Look at the document index*/
-    //    documentIndex.show(1000, truncate = false)
+    /*Look at the ranked words for all documents*/
+    //    rankedWordDocuments.show(1000, truncate = false)
 
-    val searcher = new DocumentSearcher(documentIndex)
+    val searcher = new DocumentSearcher(rankedWordDocuments)
     while (true) {
       Console.out.println("Enter keywords separated by spaces (CTRL-C for exit):")
       val userInput = StdIn.readLine()

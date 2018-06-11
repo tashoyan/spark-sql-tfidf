@@ -8,21 +8,35 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.io.Source
 
-class DocumentIndexer(
-                       docsDirPath: String,
-                       config: DocumentIndexerConfig = DocumentIndexerConfig()
-                     ) {
+/**
+  * Assigns ranks to words in documents.
+  * Ranks are actually TF * IDF.
+  *
+  * @param docsDirPath Path to the directory with text documents.
+  * @param config      Config object that allows to set custom column in the data set.
+  */
+class DocumentWordRanker(
+                          docsDirPath: String,
+                          config: RankerConfig = RankerConfig()
+                        ) {
   private val spark = SparkSession.builder()
     .appName("TfIdf")
     .getOrCreate()
 
   import spark.implicits._
 
-  def buildIndex: DataFrame = {
+  /**
+    * Assigns ranks to all words in all documents obtained from the [[docsDirPath]] directory.
+    *
+    * @return Data set with columns describing documents (id, name, file path)
+    *         and word ranks (word, its rank).
+    *         Each word is listed at most once for each document.
+    */
+  def rankWords: DataFrame = {
     val documents = readDocuments(docsDirPath)
     val wordsColumn = "words"
     val words = prepareWords(documents, wordsColumn)
-    indexImportantWords(words, wordsColumn)
+    rankWords(words, wordsColumn)
   }
 
   protected def readDocuments(docsDirPath: String): DataFrame = {
@@ -72,7 +86,7 @@ class DocumentIndexer(
     StopWordsRemover.loadDefaultStopWords("english") ++
       Seq("till", "since")
 
-  protected def indexImportantWords(words: DataFrame, wordsColumn: String): DataFrame = {
+  protected def rankWords(words: DataFrame, wordsColumn: String): DataFrame = {
     val tfIdfConfig = TfIdfConfig(documentColumn = wordsColumn)
     val tfIdf = new TfIdf(tfIdfConfig)
     val tfIdfWords = tfIdf.genTfIdf(words)
@@ -90,8 +104,8 @@ class DocumentIndexer(
 
 }
 
-case class DocumentIndexerConfig(
-                                  rawTextColumn: String = "raw_text",
-                                  docNameColumn: String = "doc_name",
-                                  docPathColumn: String = "doc_path"
-                                )
+case class RankerConfig(
+                         rawTextColumn: String = "raw_text",
+                         docNameColumn: String = "doc_name",
+                         docPathColumn: String = "doc_path"
+                       )

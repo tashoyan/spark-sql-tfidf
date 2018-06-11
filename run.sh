@@ -10,4 +10,4 @@ $SPARK_HOME/bin/spark-submit \
 --driver-java-options "-Dlog4j.configuration=file://$work_dir/src/test/resources/log4j.xml" \
 --driver-memory 2G \
 --class com.github.tashoyan.tfidf.Main \
-target/scala-2.11/spark-sql-tfidf-assembly-0.1-SNAPSHOT.jar songs_db
+"$work_dir/target/scala-2.11/spark-sql-tfidf-assembly-0.1-SNAPSHOT.jar" songs_db

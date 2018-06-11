@@ -69,14 +69,14 @@ class TfIdf(config: TfIdfConfig = TfIdfConfig()) {
 }
 
 case class TfIdfConfig(
-    documentColumn: String = "document",
-    docIdColumn: String = "doc_id",
-    tokenColumn: String = "token",
-    tfColumn: String = "tf",
-    dfColumn: String = "df",
-    idfColumn: String = "idf",
-    tfIdfColumn: String = "tf_idf"
-)
+                        documentColumn: String = "document",
+                        docIdColumn: String = "doc_id",
+                        tokenColumn: String = "token",
+                        tfColumn: String = "tf",
+                        dfColumn: String = "df",
+                        idfColumn: String = "idf",
+                        tfIdfColumn: String = "tf_idf"
+                      )
 
 object TfIdfSpark {
 
