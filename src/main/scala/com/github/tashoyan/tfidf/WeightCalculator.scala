@@ -9,15 +9,15 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import scala.io.Source
 
 /**
-  * Assigns ranks to words in documents.
-  * Ranks are actually TF * IDF.
+  * Assigns weights to words in documents.
+  * Weights are actually TF * IDF.
   *
   * @param docsDirPath Path to the directory with text documents.
   * @param config      Config object that allows to set custom column in the data set.
   */
-class DocumentWordRanker(
+class WeightCalculator(
                           docsDirPath: String,
-                          config: RankerConfig = RankerConfig()
+                          config: WeightCalculatorConfig = WeightCalculatorConfig()
                         ) {
   private val spark = SparkSession.builder()
     .appName("TfIdf")
@@ -26,17 +26,17 @@ class DocumentWordRanker(
   import spark.implicits._
 
   /**
-    * Assigns ranks to all words in all documents obtained from the [[docsDirPath]] directory.
+    * Assigns weights to all words in all documents obtained from the [[docsDirPath]] directory.
     *
     * @return Data set with columns describing documents (id, name, file path)
-    *         and word ranks (word, its rank).
+    *         and word weights (word, its weight).
     *         Each word is listed at most once for each document.
     */
-  def rankWords: DataFrame = {
+  def calcWordWeights: DataFrame = {
     val documents = readDocuments(docsDirPath)
     val wordsColumn = "words"
     val words = prepareWords(documents, wordsColumn)
-    rankWords(words, wordsColumn)
+    calcWordWeights(words, wordsColumn)
   }
 
   protected def readDocuments(docsDirPath: String): DataFrame = {
@@ -105,7 +105,7 @@ class DocumentWordRanker(
     StopWordsRemover.loadDefaultStopWords("english") ++
       Seq("till", "since")
 
-  protected def rankWords(words: DataFrame, wordsColumn: String): DataFrame = {
+  protected def calcWordWeights(words: DataFrame, wordsColumn: String): DataFrame = {
     val tfIdfConfig = TfIdfConfig(documentColumn = wordsColumn)
     val tfIdf = new TfIdf(tfIdfConfig)
     val tfIdfWords = tfIdf.genTfIdf(words)
@@ -123,7 +123,7 @@ class DocumentWordRanker(
 
 }
 
-case class RankerConfig(
+case class WeightCalculatorConfig(
                          rawTextColumn: String = "raw_text",
                          docNameColumn: String = "doc_name",
                          docPathColumn: String = "doc_path"

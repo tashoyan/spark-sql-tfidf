@@ -5,15 +5,15 @@ import org.apache.spark.sql.functions._
 
 /**
   * Document searcher.
-  * Searches by keywords in a data set of documents with ranked words. Words are ranked by TF * IDF.
+  * Searches by keywords in a data set of documents with weighted words. Words weights are actually TF * IDF.
   *
-  * @param rankedWordDocuments Data set of documents with ranked words. Word rank is TF * IDF.
+  * @param weightedWordDocuments Data set of documents with weighted words. Word weight is TF * IDF.
   *                            This data set must have all columns listed in [[DocumentSearcherConfig]].
   * @param maxDocsReturn       A search will return at most this number of documents.
   * @param config              Config object that allows to set custom column in the data set.
   */
 class DocumentSearcher(
-                        rankedWordDocuments: DataFrame,
+                        weightedWordDocuments: DataFrame,
                         maxDocsReturn: Int = 5,
                         config: DocumentSearcherConfig = DocumentSearcherConfig()
                       ) {
@@ -45,7 +45,7 @@ class DocumentSearcher(
 
   /**
     * Gets documents with their ranks for the given set of keywords.
-    * Looks for documents in the [[rankedWordDocuments]] data set.
+    * Looks for documents in the [[weightedWordDocuments]] data set.
     * For a document, its rank against the user query is a sum of TF * IDF for all user's keywords.
     *
     * @param keyWords      Keywords to look within each document.
@@ -53,7 +53,7 @@ class DocumentSearcher(
     * @return Data set with columns describing documents (id, name, file path) and a column with document ranks.
     */
   protected def getRankedDocuments(keyWords: Set[String], docRankColumn: String): DataFrame = {
-    val matchingDocs = rankedWordDocuments
+    val matchingDocs = weightedWordDocuments
       .where(col(config.tokenColumn) isin (keyWords.toSeq: _*))
     matchingDocs
       .groupBy(config.docIdColumn, config.docNameColumn, config.docPathColumn)

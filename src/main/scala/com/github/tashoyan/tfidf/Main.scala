@@ -10,14 +10,15 @@ object Main {
     }
     val docsDirPath = args.head
 
-    Console.out.println(s"Ranking words in the documents located in $docsDirPath")
-    val ranker = new DocumentWordRanker(docsDirPath)
-    val rankedWordDocuments = ranker.rankWords
+    Console.out.println(s"Loading documents from $docsDirPath")
+    Console.out.println("Assigning weights to words")
+    val weightCalculator = new WeightCalculator(docsDirPath)
+    val weightedWordDocuments = weightCalculator.calcWordWeights
       .cache()
-    /*Look at the ranked words for all documents*/
-    //    rankedWordDocuments.show(1000, truncate = false)
+    /*Look at the weights for all words for all documents*/
+    //    weightedWordDocuments.show(1000, truncate = false)
 
-    val searcher = new DocumentSearcher(rankedWordDocuments)
+    val searcher = new DocumentSearcher(weightedWordDocuments)
     while (true) {
       Console.out.println("Enter keywords separated by spaces (CTRL-C for exit):")
       val userInput = StdIn.readLine()

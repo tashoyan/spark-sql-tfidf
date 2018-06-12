@@ -8,8 +8,8 @@ Additionally, this project implements a trivial search engine based on TF-IDF ra
 The search engine accepts keywords from the user on the standard input
 and looks for songs in the `songs_db` directory.
 
-The search engine ranks all words of all songs lyrics.
-The rank of a word in a document is its TF-IDF value within this document.
+The search engine calculates weights for all words of all songs lyrics.
+The weight of a word in a document is its TF-IDF value within this document.
 When fulfilling a user request, the engine retrieves documents with highest matching ranks.
 It calculates matching rank for a document according to the formula:
 ```text
@@ -27,7 +27,7 @@ Run the shell script:
 ./songs_searcher.sh
 ```
 The search engine first will read all songs from the `songs_db` directory
-and build the data set of ranked words.
+and build the data set of weighted words.
 Then it will ask for search keywords.
 Enter your keywords separated by spaces and press Enter.
 The engine will display some songs in the order of relevance to the search terms:
