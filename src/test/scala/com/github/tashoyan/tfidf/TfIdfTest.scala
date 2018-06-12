@@ -8,8 +8,8 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
 
   private val sample: Seq[Seq[String]] = Seq(
     "one flesh one bone one true religion",
-    "the only good X is a dead X",
-    "one is dead"
+    "all flesh is grass",
+    "one is all all is one"
   )
     .map(_.split("\\s+").toSeq)
 
@@ -42,9 +42,18 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
       .cache()
     /*Look at the results*/
     //    result
+    //      .select(
+    //        config.docIdColumn,
+    //        config.documentColumn,
+    //        config.tokenColumn,
+    //        config.tfColumn,
+    //        config.dfColumn,
+    //        config.idfColumn,
+    //        config.tfIdfColumn,
+    //        "another_column"
+    //      )
     //      .orderBy(
     //        col(config.docIdColumn),
-    //        col(config.tokenColumn),
     //        col(config.tfIdfColumn).desc
     //      )
     //      .show(false)
@@ -75,7 +84,7 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
 
     val doc0Flesh = doc0Tokens.filter { case (token, _) => token == "flesh" }
     assert(doc0Flesh.length === 1, "Number of entries for token 'flesh' in doc 0")
-    assert(doc0Flesh.head._2 === 0.6931471805599453, "TF*IDF for token 'flesh' in doc 0")
+    assert(doc0Flesh.head._2 === 0.28768207245178085, "TF*IDF for token 'flesh' in doc 0")
 
     /* Doc 1*/
 
@@ -83,17 +92,17 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
       .select("token", "tf_idf", "document")
       .collect()
       .map(row => (row.getAs[String](0), row.getAs[Double](1), row.getAs[Seq[String]](2)))
-      .filter(_._3 == Seq("the", "only", "good", "X", "is", "a", "dead", "X"))
+      .filter(_._3 == Seq("all", "flesh", "is", "grass"))
       .map(v => (v._1, v._2))
-    assert(doc1Tokens.length === 7, "Number of distinct tokens in doc 1")
+    assert(doc1Tokens.length === 4, "Number of distinct tokens in doc 1")
 
-    val doc1X = doc1Tokens.filter { case (token, _) => token == "X" }
-    assert(doc1X.length === 1, "Number of entries for token 'X' in doc 1")
-    assert(doc1X.head._2 == 1.3862943611198906, "TF*IDF for token 'X' in doc 1")
+    val doc1X = doc1Tokens.filter { case (token, _) => token == "flesh" }
+    assert(doc1X.length === 1, "Number of entries for token 'flesh' in doc 1")
+    assert(doc1X.head._2 == 0.28768207245178085, "TF*IDF for token 'flesh' in doc 1")
 
-    val doc1Dead = doc1Tokens.filter { case (token, _) => token == "dead" }
-    assert(doc1Dead.length === 1, "Number of entries for token 'dead' in doc 1")
-    assert(doc1Dead.head._2 === 0.28768207245178085, "TF*IDF for token 'dead' in doc 1")
+    val doc1Dead = doc1Tokens.filter { case (token, _) => token == "grass" }
+    assert(doc1Dead.length === 1, "Number of entries for token 'grass' in doc 1")
+    assert(doc1Dead.head._2 === 0.6931471805599453, "TF*IDF for token 'grass' in doc 1")
 
     /* Doc 2*/
 
@@ -101,17 +110,17 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
       .select("token", "tf_idf", "document")
       .collect()
       .map(row => (row.getAs[String](0), row.getAs[Double](1), row.getAs[Seq[String]](2)))
-      .filter(_._3 == Seq("one", "is", "dead"))
+      .filter(_._3 == Seq("one", "is", "all", "all", "is", "one"))
       .map(v => (v._1, v._2))
     assert(doc2Tokens.length === 3, "Number of distinct tokens in doc 2")
 
     val doc2One = doc2Tokens.filter { case (token, _) => token == "one" }
     assert(doc2One.length === 1, "Number of entries for token 'one' in doc 2")
-    assert(doc2One.head._2 === 0.28768207245178085, "TF*IDF for token 'one' in doc 2")
+    assert(doc2One.head._2 === 0.5753641449035617, "TF*IDF for token 'one' in doc 2")
 
-    val doc2Dead = doc2Tokens.filter { case (token, _) => token == "dead" }
-    assert(doc2Dead.length === 1, "Number of entries for token 'dead' in doc 2")
-    assert(doc2Dead.head._2 === 0.28768207245178085, "TF*IDF for token 'dead' in doc 2")
+    val doc2Dead = doc2Tokens.filter { case (token, _) => token == "all" }
+    assert(doc2Dead.length === 1, "Number of entries for token 'all' in doc 2")
+    assert(doc2Dead.head._2 === 0.5753641449035617, "TF*IDF for token 'all' in doc 2")
 
   }
 }
