@@ -22,6 +22,10 @@ Run sbt and execute `assembly` task to build the uber jar of the application.
 
 ## Running the search engine
 
+Make sure you have set `SPARK_HOME` environment variable:
+```bash
+export SPARK_HOME=/path/to/spark/distribution
+```
 Run the shell script:
 ```bash
 ./songs_searcher.sh
