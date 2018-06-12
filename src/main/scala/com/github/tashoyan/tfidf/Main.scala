@@ -38,7 +38,7 @@ object Main {
 
   private def toPrettyString(documents: Set[Document]): String =
     documents.zipWithIndex
-      .map { case (doc, index) => s" $index. ${doc.name}\t${doc.filePath}" }
+      .map { case (doc, index) => s" ${index + 1}. ${doc.name}\t${doc.filePath}" }
       .mkString("\n")
 
 }

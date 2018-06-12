@@ -22,7 +22,10 @@ Run sbt and execute `assembly` task to build the uber jar of the application.
 
 ## Running the search engine
 
-Run the shell script `run.sh`.
+Run the shell script:
+```bash
+./songs_searcher.sh
+```
 The search engine first will read all songs from the `songs_db` directory
 and build the data set of ranked words.
 Then it will ask for search keywords.
@@ -32,8 +35,8 @@ The engine will display some songs in the order of relevance to the search terms
 Enter keywords separated by spaces (CTRL-C for exit):
 love forever
 Found:
- 0. love_me_tender.txt  /work/workspace/spark-sql-tfidf/songs_db/love_me_tender.txt
- 1. red_river_valley.txt        /work/workspace/spark-sql-tfidf/songs_db/red_river_valley.txt
+ 1. love_me_tender.txt  /work/workspace/spark-sql-tfidf/songs_db/love_me_tender.txt
+ 2. red_river_valley.txt        /work/workspace/spark-sql-tfidf/songs_db/red_river_valley.txt
 ```
 
 ## Usage terms
