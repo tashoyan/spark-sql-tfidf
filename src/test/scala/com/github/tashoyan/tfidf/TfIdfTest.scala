@@ -63,10 +63,10 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
       assert(columns.contains(mandatoryColumn.asInstanceOf[String]), s"Mandatory column $mandatoryColumn is expected")
     }
 
-    val clusterIds = result.select("another_column")
+    val anotherColumn = result.select("another_column")
       .collect()
       .map(_.getAs[Int](0))
-    assert(clusterIds.forall(_ == 10), "Custom column another_column must present and must have original value")
+    assert(anotherColumn.forall(_ == 10), "Custom column another_column must present and must have original value")
 
     /* Doc 0*/
 
@@ -96,13 +96,13 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
       .map(v => (v._1, v._2))
     assert(doc1Tokens.length === 4, "Number of distinct tokens in doc 1")
 
-    val doc1X = doc1Tokens.filter { case (token, _) => token == "flesh" }
-    assert(doc1X.length === 1, "Number of entries for token 'flesh' in doc 1")
-    assert(doc1X.head._2 == 0.28768207245178085, "TF*IDF for token 'flesh' in doc 1")
+    val doc1Flesh = doc1Tokens.filter { case (token, _) => token == "flesh" }
+    assert(doc1Flesh.length === 1, "Number of entries for token 'flesh' in doc 1")
+    assert(doc1Flesh.head._2 == 0.28768207245178085, "TF*IDF for token 'flesh' in doc 1")
 
-    val doc1Dead = doc1Tokens.filter { case (token, _) => token == "grass" }
-    assert(doc1Dead.length === 1, "Number of entries for token 'grass' in doc 1")
-    assert(doc1Dead.head._2 === 0.6931471805599453, "TF*IDF for token 'grass' in doc 1")
+    val doc1Grass = doc1Tokens.filter { case (token, _) => token == "grass" }
+    assert(doc1Grass.length === 1, "Number of entries for token 'grass' in doc 1")
+    assert(doc1Grass.head._2 === 0.6931471805599453, "TF*IDF for token 'grass' in doc 1")
 
     /* Doc 2*/
 
@@ -118,9 +118,9 @@ class TfIdfTest extends FunSuite with BeforeAndAfter {
     assert(doc2One.length === 1, "Number of entries for token 'one' in doc 2")
     assert(doc2One.head._2 === 0.5753641449035617, "TF*IDF for token 'one' in doc 2")
 
-    val doc2Dead = doc2Tokens.filter { case (token, _) => token == "all" }
-    assert(doc2Dead.length === 1, "Number of entries for token 'all' in doc 2")
-    assert(doc2Dead.head._2 === 0.5753641449035617, "TF*IDF for token 'all' in doc 2")
+    val doc2All = doc2Tokens.filter { case (token, _) => token == "all" }
+    assert(doc2All.length === 1, "Number of entries for token 'all' in doc 2")
+    assert(doc2All.head._2 === 0.5753641449035617, "TF*IDF for token 'all' in doc 2")
 
   }
 }
